@@ -1,0 +1,37 @@
+// Prisma schema for Véronique AI - voice assistant
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User profile stored locally (first_name, assistant config)
+model UserProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique // stable client-side identifier
+  firstName     String
+  assistantName String   @default("Véronique")
+  language      String   @default("fr-FR")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messages      Message[]
+}
+
+// Conversation history (persisted between sessions)
+model Message {
+  id        String   @id @default(cuid())
+  profileId String
+  role      String // 'user' | 'assistant'
+  content   String
+  action    String? // optional JSON describing a function call that was executed
+  createdAt DateTime @default(now())
+
+  profile   UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+}
