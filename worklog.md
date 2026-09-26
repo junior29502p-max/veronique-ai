@@ -291,3 +291,23 @@ Stage Summary:
   documented in DEPLOY.md + .env.example. ElevenLabs TTS already active,
   Groq blocked from sandbox but will work on Vercel, OpenRouter is the
   reachable free LLM alternative.
+
+---
+Task ID: 14
+Agent: main
+Task: Push to GitHub + prepare Vercel import
+
+Work Log:
+- CRITICAL security: discovered .env was ALREADY tracked in git history (committed before .gitignore rule was added). Removed from tracking with `git rm --cached .env`.
+- Verified actual API key values (gsk_HXnz..., sk_935c...) present in old commit diffs → created a CLEAN orphan history (single commit, no secrets) to ensure no key ever reaches GitHub.
+- Verified clean history: `git log -p --all | grep gsk_HXnz|sk_935` → empty.
+- Added remote origin, pushed main → https://github.com/junior29502p-max/veronique-ai.git
+- Removed token from remote URL (security — replaced with clean https URL).
+- Verified via GitHub API: repo public, 135 files, default branch main.
+- Security check via API: `.env` → HTTP 404 (NOT pushed, safe). `.env.example`, `DEPLOY.md`, `vercel.json`, `src/components/fluid-orb.tsx` → all present.
+
+Stage Summary:
+- Code live on GitHub: https://github.com/junior29502p-max/veronique-ai
+- No API keys leaked (history scrubbed, .env ignored).
+- User's PAT (ghp_459X...) should be REVOKED now for safety.
+- Ready for Vercel import (next step).
