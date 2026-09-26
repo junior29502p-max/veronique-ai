@@ -311,3 +311,21 @@ Stage Summary:
 - No API keys leaked (history scrubbed, .env ignored).
 - User's PAT (ghp_459X...) should be REVOKED now for safety.
 - Ready for Vercel import (next step).
+
+---
+Task ID: 15
+Agent: main
+Task: Fix Vercel build error (.next/standalone copy failure)
+
+Work Log:
+- Error: `cp: cannot create directory '.next/standalone/.next/': No such file or directory` → build script exited 1 on Vercel.
+- Root cause: package.json build script was `next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/` — designed for `output:'standalone'` (Docker/self-hosted). I had already removed that output mode for Vercel, so `.next/standalone/` no longer exists → copy fails.
+- Fix: changed scripts to:
+    "build": "next build"
+    "start": "next start"
+    "postinstall": "prisma generate"   (ensure Prisma client w/ libSQL adapter is generated at Vercel build)
+- Verified locally: `bun run build` succeeds in 9.2s, 10 routes (1 static page + 7 API routes).
+- Committed + pushed to GitHub (commit f2c6072).
+
+Stage Summary:
+- Vercel build will now succeed. User should re-trigger deploy on Vercel (automatic if Git integration is connected).
